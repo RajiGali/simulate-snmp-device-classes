@@ -91,7 +91,7 @@ class simulate_snmp_devices():
                 path_list.append(path[i])
                 print((i+1),(path[i].split('/')[-1]),port)
 
-                #.os.system("snmpsimd.py --v3-engine-id=010203040505060880 --v3-user=qxf2 --data-dir=%s --agent-udpv4-endpoint=127.0.0.1:%s --logging-method=file:./data/snmp_logs.txt:10m --log-level=debug & "%(path[i],port))
+                os.system("snmpsimd.py --v3-engine-id=010203040505060880 --v3-user=qxf2 --data-dir=%s --agent-udpv4-endpoint=127.0.0.1:%s --logging-method=file:./data/snmp_logs.txt:10m --log-level=debug & "%(path[i],port))
             except OSError:
                 raise ValueError("error in running the snmp device 'snmpsimd.py' command")
 
