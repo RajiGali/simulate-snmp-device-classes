@@ -3,6 +3,7 @@ import argparse
 import fnmatch,itertools
 from faker import Faker
 import socket
+from itertools import chain
 
 my_dir = ".//data"
 
@@ -82,21 +83,41 @@ class simulate_snmp_devices():
 
         faker = Faker()
         port_list = []
+        path_list = []
         for i in range(num_devices):
             try:
                 port = self.get_open_port(host="127.0.0.1")
                 port_list.append(port)
+                path_list.append(path[i])
                 print((i+1),(path[i].split('/')[-1]),port)
-                os.system("snmpsimd.py --v3-engine-id=010203040505060880 --v3-user=qxf2 --data-dir=%s --agent-udpv4-endpoint=127.0.0.1:%s --logging-method=file:./data/snmp_logs.txt:10m --log-level=debug & "%(path[i],port))
+
+                #.os.system("snmpsimd.py --v3-engine-id=010203040505060880 --v3-user=qxf2 --data-dir=%s --agent-udpv4-endpoint=127.0.0.1:%s --logging-method=file:./data/snmp_logs.txt:10m --log-level=debug & "%(path[i],port))
             except OSError:
                 raise ValueError("error in running the snmp device 'snmpsimd.py' command")
 
         ip_list = [faker.ipv4() for port in port_list]
-        #self.update_iptables(port_list,ip_list)
-        return ip_list
 
-    #def snmpwalk_dev_templates(self,*args):
-        #'snmpwalk the chosen device templates'
+        #self.update_iptables(port_list,ip_list)
+        return port_list,path_list
+
+    def snmpwalk_dev_templates(self,*args):
+        'snmpwalk the chosen device templates'
+        port_path=(list(itertools.chain(*args)))
+        port_list, path_list = map(list, zip(port_path)) 
+        path_list = list(chain.from_iterable(path_list))
+        port_list = list(chain.from_iterable(port_list))
+        no_device=len(port_list)
+        device_name=[]
+        device_port=[]
+        for path_list,port_list in zip(path_list,port_list):
+            device_name.append(path_list.split("\\")[-1])
+            device_port.append(port_list)
+        for i in no_device:
+            try:
+                os.system("snmpwalk -v2c -c %s 127.0.0.1:%s >>%s.txt"%(device_name[i],device_port[i],device_name[i]))
+            except OSError:
+                raise ValueError("error in running the snmpwalk")
+        
 
 
 
@@ -111,7 +132,9 @@ if __name__ == "__main__":
     elif args.devices is not False:
         template_path=devices.find_dev_template(args.devices)
         if template_path is not None:
-            devices.create_snmp(template_path)
+            snmpwalk_list=devices.create_snmp(template_path)
+            if snmpwalk_list is not None:
+                devices.snmpwalk_dev_templates(snmpwalk_list)
 
     
     
