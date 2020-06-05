@@ -95,6 +95,8 @@ class simulate_snmp_devices():
         #self.update_iptables(port_list,ip_list)
         return ip_list
 
+    #def snmpwalk_dev_templates(self,*args):
+        #'snmpwalk the chosen device templates'
 
 
 
