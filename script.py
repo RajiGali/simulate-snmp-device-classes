@@ -110,8 +110,13 @@ class simulate_snmp_devices():
         device_name=[]
         device_port=[]
         for path_list,port_list in zip(path_list,port_list):
-            device_name.append(path_list.split("\\")[-1])
-            device_port.append(port_list)
+                if '\\' in path_list:
+                    device_name.append(path_list.split("\\")[-1])
+                    device_port.append(port_list)
+                else:
+                    device_name.append(path_list.split("/")[-1])
+                    device_port.append(port_list)
+
         for i in range(no_device):
             try:
                 print("snmpwalk -v2c -c %s 127.0.0.1:%s 1.3.6 "%(device_name[i],device_port[i]))
