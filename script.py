@@ -112,7 +112,7 @@ class simulate_snmp_devices():
         for path_list,port_list in zip(path_list,port_list):
             device_name.append(path_list.split("\\")[-1])
             device_port.append(port_list)
-        for i in no_device:
+        for i in range(no_device):
             try:
                 os.system("snmpwalk -v2c -c %s 127.0.0.1:%s >>%s.txt"%(device_name[i],device_port[i],device_name[i]))
             except OSError:
