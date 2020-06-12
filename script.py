@@ -1,4 +1,8 @@
-#!/usr/bin/python
+'''
+The script is used to run snmp agent for multiple device templates chosen by the user.
+ 
+'''
+
 # -*- coding: utf-8 -*-
 import os
 import argparse
@@ -15,18 +19,18 @@ host = conf.host
 
 
 class simulate_snmp_devices:
-    '''Class to simulate snmp devices'''
+    "Class to simulate snmp devices"
 
     def available_templates(self, *args):
         print('************Available device templates to use found in data directory********')
 
-        for (root_dir_path, files) in os.walk(my_dir):
+        for (root_dir_path, sub_dir, files) in os.walk(my_dir):
 
             if files:
                 tag = os.path.relpath(root_dir_path, my_dir)
 
                 for file in files:
-                    
+
                     sub_folder = os.path.basename(tag)
 
                     print((sub_folder if sub_folder else ''), '--->', file)
@@ -53,10 +57,9 @@ class simulate_snmp_devices:
     def find_dev_template(self, *args):
         "To find the device template path in data directory."
 
-        my_dir = './/data'
         dev_templates = list(itertools.chain(*args))
         template_path = []
-        for (root_dir_path,files) in os.walk(my_dir):
+        for (root_dir_path , sub_dir, files) in os.walk(my_dir):
 
             if files:
                 tag = os.path.relpath(root_dir_path, my_dir)
@@ -71,6 +74,7 @@ class simulate_snmp_devices:
         return template_path
 
     def get_open_port(self, host):
+        "To find open port"
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((host, 0))
@@ -80,6 +84,7 @@ class simulate_snmp_devices:
         return port
 
     def create_snmp(self, *args):
+        "snmpwalk the chosen device templates"
         path = list(itertools.chain(*args))
         num_devices = len(path)
 
@@ -93,7 +98,8 @@ class simulate_snmp_devices:
                 path_list.append(path[i])
                 print(i + 1, path[i].split('/')[-1], port)
 
-                subprocess.run('snmpsimd.py --v3-engine-id=010203040505060880 --v3-user=qxf2 --data-dir=%s --agent-udpv4-endpoint=127.0.0.1:%s --logging-method=file:./data/snmp_logs.txt:10m --log-level=debug & ' % (path[i], port))
+                os.system('snmpsimd.py --v3-engine-id=010203040505060880 --v3-user=qxf2 --data-dir=%s --agent-udpv4-endpoint=127.0.0.1:%s --logging-method=file:./data/snmp_logs.txt:10m --log-level=debug & ' %(path[i], port))
+
             except OSError:
                 raise ValueError(
                     "error in running the snmp device 'snmpsimd.py' command")
