@@ -131,8 +131,8 @@ class simulate_snmp_devices:
 if __name__ == '__main__':
     devices = simulate_snmp_devices()
     args = devices.parse_args()
-    if args.Print is True:
-        devices.available_templates(args.Print)
+    if args.print is True:
+        devices.available_templates(args.print)
     elif args.devices is not False:
         template_path = devices.find_dev_template(args.devices)
         if template_path is not None:
