@@ -47,9 +47,9 @@ class simulate_snmp_devices:
         # Adding optional argument
 
         parser.add_argument('-d', '--devices', required=False, nargs='+',
-                            help="Enter the file names using '-d' option Ex:- -d xp.snmprec ubuntu.snmprec  ... ", default=False)
-        parser.add_argument('-p', '--Print', required=False, action='store_true',
-                            help=" type '-p' and hit 'Enter' to :show available device templates to use...")
+                            help="Enter single or multiple file names using '-d' option Ex:- -d xp.snmprec ubuntu.snmprec", default=False, metavar="")
+        parser.add_argument('-p', '--print', required=False, action='store_true',
+                            help=" use '-p' for listing down available device templates to use")
         # Read arguments from command line
         args = parser.parse_args()
         return args
