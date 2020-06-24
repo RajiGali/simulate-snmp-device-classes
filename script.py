@@ -4,38 +4,41 @@ The script is used to run snmp agent for multiple device templates chosen by the
 '''
 
 # -*- coding: utf-8 -*-
-import os
+import os,configparser
 import argparse
 import fnmatch
 import itertools
 from faker import Faker
 import socket
 from itertools import chain
-import conf
 import subprocess
 
-my_dir = conf.data
-host = conf.host
 
+config = configparser.ConfigParser()
+conf_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),'.','conf'))
+config.read(os.path.join(conf_dir,'device_conf.py'))
+my_dir = config.get('data','dir')
+host = config.get('data','host')
 
 class simulate_snmp_devices:
     "Class to simulate snmp devices"
 
     def available_templates(self, *args):
-        print('************Available device templates to use found in data directory********')
+        try:
+            print('************Available device templates to use found in data directory********')
+            for (root_dir_path, sub_dir, files) in os.walk(my_dir):
+                if files:
+                    tag = os.path.relpath(root_dir_path, my_dir)
 
-        for (root_dir_path, sub_dir, files) in os.walk(my_dir):
+                    for file in files:
 
-            if files:
-                tag = os.path.relpath(root_dir_path, my_dir)
+                        sub_folder = os.path.basename(tag)
 
-                for file in files:
+                        print((sub_folder if sub_folder else ''), '--->', file)
 
-                    sub_folder = os.path.basename(tag)
-
-                    print((sub_folder if sub_folder else ''), '--->', file)
-
-        print('************End********')
+            print('************End********')
+        except:
+            raise(FileNotFoundError,"Error in reading available device templates ")
 
     def parse_args(self):
         "This function is used to input the templates chosen by the user"
@@ -83,7 +86,7 @@ class simulate_snmp_devices:
         s.close()
         return port
 
-    def create_snmp(self,*agrs):
+    def create_snmp(self,*args):
         "snmpwalk the chosen device templates"
         path = list(itertools.chain(*args))
         num_devices = len(path)
@@ -102,9 +105,9 @@ class simulate_snmp_devices:
                 raise ValueError(
                     "error in running the snmp device 'snmpsimd.py' command")
 
-        return port_list, path_list
+        return (port_list, path_list)
 
-    def snmpwalk_dev_templates(self,port):
+    def snmpwalk_dev_templates(self,*args):
         "snmpwalk the chosen device templates"
 
         port_path = list(itertools.chain(*args))
@@ -131,6 +134,7 @@ class simulate_snmp_devices:
 if __name__ == '__main__':
     devices = simulate_snmp_devices()
     args = devices.parse_args()
+
     if args.print is True:
         devices.available_templates(args.print)
     elif args.devices is not False:
