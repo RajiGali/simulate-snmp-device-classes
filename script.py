@@ -23,7 +23,7 @@ host = config.get('data','host')
 class simulate_snmp_devices:
     "Class to simulate snmp devices"
 
-    def available_templates(self, *args):
+    def available_templates():
         try:
             print('************Available device templates to use found in data directory********')
             for (root_dir_path, sub_dir, files) in os.walk(my_dir):
@@ -136,7 +136,7 @@ if __name__ == '__main__':
     args = devices.parse_args()
 
     if args.print is True:
-        devices.available_templates(args.print)
+        simulate_snmp_devices.available_templates()
     elif args.devices is not False:
         template_path = devices.find_dev_template(args.devices)
         if template_path is not None:
