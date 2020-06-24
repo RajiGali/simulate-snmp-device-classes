@@ -16,7 +16,7 @@ import subprocess
 
 config = configparser.ConfigParser()
 conf_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),'.','conf'))
-config.read(os.path.join(conf_dir,'device_conf.py'))
+config.read(os.path.join(conf_dir,'device_conf.conf'))
 my_dir = config.get('data','dir')
 host = config.get('data','host')
 
