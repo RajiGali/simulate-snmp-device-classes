@@ -11,11 +11,9 @@ import subprocess
 from utils import Utils
 
 class simulate_snmp_devices:
-   
+
     "Class to simulate snmp devices"
-   
     def __init__(self):
-        
         "initialize"
         utils = Utils()
         self.config = utils.read_conf('device.conf')
@@ -38,9 +36,7 @@ class simulate_snmp_devices:
             raise("Error in reading available device templates ")
 
     def parse_args():
-        
         "This function is used to input the templates chosen by the user"
-   
         # Initialize parser
         parser = argparse.ArgumentParser(description='SNMP Simulator.')
 
@@ -54,12 +50,10 @@ class simulate_snmp_devices:
         return args
 
     def find_dev_template(data_dir, *args):
-        
         "To find the device template path in data directory."
-    
         dev_templates = list(itertools.chain(*args))
         template_path = []
-        
+
         for (root_dir_path , _, files) in os.walk(data_dir):
 
             if files:
@@ -75,9 +69,7 @@ class simulate_snmp_devices:
         return template_path
 
     def get_open_port(self,host):
-        
-        "To find open port"
-    
+        """To find open port"""
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((host, 0))
@@ -87,9 +79,7 @@ class simulate_snmp_devices:
         return port
 
     def create_snmp(self,*args):
-        
-        "snmpwalk the chosen device templates"
-    
+        """snmpwalk the chosen device templates"""
         path = list(itertools.chain(*args))
         num_devices = len(path)
         port_list = []
@@ -101,7 +91,6 @@ class simulate_snmp_devices:
                 path_list.append(path[i])
                 print(i + 1, path[i].split('/')[-1], port)
                 subprocess.call(("snmpsimd.py --v3-engine-id=010203040505060880 --v3-user=qxf2 --data-dir=%s --agent-udpv4-endpoint=127.0.0.1:%s --logging-method=file:./data/snmp_logs.txt:10m --log-level=debug &" %(path[i], port)),shell=True)
-      
             except OSError:
                 raise ValueError(
                     "error in running the snmp device 'snmpsimd.py' command")
@@ -109,9 +98,7 @@ class simulate_snmp_devices:
         return (port_list, path_list)
 
     def snmpwalk_dev_templates(*args):
-        
         "snmpwalk the chosen device templates"
-    
         port_path = list(itertools.chain(*args))
         (port_list, path_list) = map(list, zip(port_path))
         path_list = list(chain.from_iterable(path_list))
