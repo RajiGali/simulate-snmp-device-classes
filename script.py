@@ -4,7 +4,7 @@ The script is used to run snmp agent for multiple device templates chosen by the
 '''
 
 # -*- coding: utf-8 -*-
-import os,configparser
+import os
 import argparse
 import fnmatch
 import itertools
@@ -12,23 +12,20 @@ from faker import Faker
 import socket
 from itertools import chain
 import subprocess
-
-
-config = configparser.ConfigParser()
-conf_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),'.','conf'))
-config.read(os.path.join(conf_dir,'device_conf.conf'))
-my_dir = config.get('data','dir')
-host = config.get('data','host')
+from utils import Utils
 
 class simulate_snmp_devices:
     "Class to simulate snmp devices"
+    def __init__(self):
+        utils = Utils()
+        self.config = utils.read_conf('device.conf')
 
-    def available_templates():
+    def available_templates(data_dir):
         try:
             print('************Available device templates to use found in data directory********')
-            for (root_dir_path, sub_dir, files) in os.walk(my_dir):
+            for (root_dir_path, sub_dir, files) in os.walk(data_dir):
                 if files:
-                    tag = os.path.relpath(root_dir_path, my_dir)
+                    tag = os.path.relpath(root_dir_path, data_dir)
 
                     for file in files:
 
@@ -57,22 +54,22 @@ class simulate_snmp_devices:
         args = parser.parse_args()
         return args
 
-    def find_dev_template(self, *args):
+    def find_dev_template(self, data_dir, *args):
         "To find the device template path in data directory."
-
         dev_templates = list(itertools.chain(*args))
         template_path = []
-        for (root_dir_path , sub_dir, files) in os.walk(my_dir):
+        
+        for (root_dir_path , sub_dir, files) in os.walk(data_dir):
 
             if files:
-                tag = os.path.relpath(root_dir_path, my_dir)
+                tag = os.path.relpath(root_dir_path, data_dir)
                 for device in dev_templates:
                     for file in files:
                         tag_parent = os.path.dirname(tag)
                         sub_folder = os.path.basename(tag)
                         if fnmatch.fnmatch(file, device):
                             template_path.append(os.path.normpath(
-                                os.path.join(my_dir, tag_parent, sub_folder)))
+                                os.path.join(data_dir, tag_parent, sub_folder)))
 
         return template_path
 
@@ -134,11 +131,13 @@ class simulate_snmp_devices:
 if __name__ == '__main__':
     devices = simulate_snmp_devices()
     args = devices.parse_args()
+    data_dir = devices.config.get('data','dir')
+    host = devices.config.get('data','host')
 
     if args.print is True:
-        simulate_snmp_devices.available_templates()
+        simulate_snmp_devices.available_templates(data_dir)
     elif args.devices is not False:
-        template_path = devices.find_dev_template(args.devices)
+        template_path = devices.find_dev_template(data_dir, args.devices)
         if template_path is not None:
             snmpwalk_list = devices.create_snmp(template_path)
             if snmpwalk_list is not None:
