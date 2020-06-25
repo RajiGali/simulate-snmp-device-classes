@@ -1,19 +1,19 @@
-'The script is used to run snmp agent for multiple device templates chosen by the user.'
+"""The script is used to run snmp agent for multiple device templates chosen by the user."""
 
 # -*- coding: utf-8 -*-
 import os
 import argparse
 import fnmatch
 import itertools
-from faker import Faker
 import socket
 from itertools import chain
 import subprocess
 from utils import Utils
 
 class simulate_snmp_devices:
-    
+   
     "Class to simulate snmp devices"
+   
     def __init__(self):
         
         "initialize"
@@ -40,6 +40,7 @@ class simulate_snmp_devices:
     def parse_args():
         
         "This function is used to input the templates chosen by the user"
+   
         # Initialize parser
         parser = argparse.ArgumentParser(description='SNMP Simulator.')
 
@@ -55,10 +56,11 @@ class simulate_snmp_devices:
     def find_dev_template(data_dir, *args):
         
         "To find the device template path in data directory."
+    
         dev_templates = list(itertools.chain(*args))
         template_path = []
         
-        for (root_dir_path , sub_dir, files) in os.walk(data_dir):
+        for (root_dir_path , _, files) in os.walk(data_dir):
 
             if files:
                 tag = os.path.relpath(root_dir_path, data_dir)
@@ -75,6 +77,7 @@ class simulate_snmp_devices:
     def get_open_port(self,host):
         
         "To find open port"
+    
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((host, 0))
@@ -86,6 +89,7 @@ class simulate_snmp_devices:
     def create_snmp(self,*args):
         
         "snmpwalk the chosen device templates"
+    
         path = list(itertools.chain(*args))
         num_devices = len(path)
         port_list = []
@@ -107,6 +111,7 @@ class simulate_snmp_devices:
     def snmpwalk_dev_templates(*args):
         
         "snmpwalk the chosen device templates"
+    
         port_path = list(itertools.chain(*args))
         (port_list, path_list) = map(list, zip(port_path))
         path_list = list(chain.from_iterable(path_list))
