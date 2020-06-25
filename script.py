@@ -1,7 +1,4 @@
-'''
-The script is used to run snmp agent for multiple device templates chosen by the user.
- 
-'''
+'The script is used to run snmp agent for multiple device templates chosen by the user.'
 
 # -*- coding: utf-8 -*-
 import os
@@ -15,15 +12,18 @@ import subprocess
 from utils import Utils
 
 class simulate_snmp_devices:
+    
     "Class to simulate snmp devices"
     def __init__(self):
+        
+        "initialize"
         utils = Utils()
         self.config = utils.read_conf('device.conf')
 
     def available_templates(data_dir):
         try:
             print('************Available device templates to use found in data directory********')
-            for (root_dir_path, sub_dir, files) in os.walk(data_dir):
+            for (root_dir_path, _, files) in os.walk(data_dir):
                 if files:
                     tag = os.path.relpath(root_dir_path, data_dir)
 
@@ -35,17 +35,15 @@ class simulate_snmp_devices:
 
             print('************End********')
         except:
-            raise(FileNotFoundError,"Error in reading available device templates ")
+            raise("Error in reading available device templates ")
 
-    def parse_args(self):
+    def parse_args():
+        
         "This function is used to input the templates chosen by the user"
-
         # Initialize parser
-
         parser = argparse.ArgumentParser(description='SNMP Simulator.')
 
         # Adding optional argument
-
         parser.add_argument('-d', '--devices', required=False, nargs='+',
                             help="Enter single or multiple file names using '-d' option Ex:- -d xp.snmprec ubuntu.snmprec", default=False, metavar="")
         parser.add_argument('-p', '--print', required=False, action='store_true',
@@ -54,7 +52,8 @@ class simulate_snmp_devices:
         args = parser.parse_args()
         return args
 
-    def find_dev_template(self, data_dir, *args):
+    def find_dev_template(data_dir, *args):
+        
         "To find the device template path in data directory."
         dev_templates = list(itertools.chain(*args))
         template_path = []
@@ -73,7 +72,8 @@ class simulate_snmp_devices:
 
         return template_path
 
-    def get_open_port(self, host):
+    def get_open_port(self,host):
+        
         "To find open port"
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -84,10 +84,10 @@ class simulate_snmp_devices:
         return port
 
     def create_snmp(self,*args):
+        
         "snmpwalk the chosen device templates"
         path = list(itertools.chain(*args))
         num_devices = len(path)
-        faker = Faker()
         port_list = []
         path_list = []
         for i in range(num_devices):
@@ -104,9 +104,9 @@ class simulate_snmp_devices:
 
         return (port_list, path_list)
 
-    def snmpwalk_dev_templates(self,*args):
+    def snmpwalk_dev_templates(*args):
+        
         "snmpwalk the chosen device templates"
-
         port_path = list(itertools.chain(*args))
         (port_list, path_list) = map(list, zip(port_path))
         path_list = list(chain.from_iterable(path_list))
@@ -130,14 +130,14 @@ class simulate_snmp_devices:
 
 if __name__ == '__main__':
     devices = simulate_snmp_devices()
-    args = devices.parse_args()
+    args = simulate_snmp_devices.parse_args()
     data_dir = devices.config.get('data','dir')
     host = devices.config.get('data','host')
 
     if args.print is True:
         simulate_snmp_devices.available_templates(data_dir)
     elif args.devices is not False:
-        template_path = devices.find_dev_template(data_dir, args.devices)
+        template_path = simulate_snmp_devices.find_dev_template(data_dir, args.devices)
         if template_path is not None:
             snmpwalk_list = devices.create_snmp(template_path)
             if snmpwalk_list is not None:
