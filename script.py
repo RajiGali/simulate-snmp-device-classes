@@ -90,14 +90,14 @@ class simulate_snmp_devices:
                 port_list.append(port)
                 path_list.append(path[i])
                 print(i + 1, path[i].split('/')[-1], port)
-                subprocess.call(("snmpsimd.py --v3-engine-id=010203040505060880 --v3-user=qxf2 --data-dir=%s --agent-udpv4-endpoint=127.0.0.1:%s --logging-method=file:./data/snmp_logs.txt:10m --log-level=debug &" %(path[i], port)),shell=True)
+                subprocess.run(("snmpsimd.py --v3-engine-id=010203040505060880 --v3-user=qxf2 --data-dir=%s --agent-udpv4-endpoint=127.0.0.1:%s --logging-method=file:./data/snmp_logs.txt:10m --log-level=debug &" %(path[i], port)),shell=True)
             except OSError:
                 raise ValueError(
                     "error in running the snmp device 'snmpsimd.py' command")
 
         return (port_list, path_list)
 
-    def snmpwalk_dev_templates(*args):
+    def snmpwalk_dev_templates(self,*args):
         "snmpwalk the chosen device templates"
         port_path = list(itertools.chain(*args))
         (port_list, path_list) = map(list, zip(port_path))
@@ -115,9 +115,13 @@ class simulate_snmp_devices:
 
         for i in range(no_device):
             try:
-                subprocess.call(("snmpwalk -v2c -c %s 127.0.0.1:%s 1.3.6 " %(device_name[i], device_port[i])),shell=True)
+                response=subprocess.call(("snmpget -v2c -c %s 127.0.0.1:%s sysDescr.0 >>%s.txt" %(device_name[i], device_port[i],device_name[i])),shell=True)
+                if response==0:
+                    print("The %s device is up and running in port --> %s ."%(device_name[i], device_port[i]))
+                else:
+                    print("The %s device is not running as expected in port --> %s."%(device_name[i], device_port[i]))
             except OSError:
-                raise ValueError('error in running the snmpwalk')
+                raise ValueError('error in running the snmpget.')
 
 
 if __name__ == '__main__':
@@ -131,6 +135,6 @@ if __name__ == '__main__':
     elif args.devices is not False:
         template_path = simulate_snmp_devices.find_dev_template(data_dir, args.devices)
         if template_path is not None:
-            snmpwalk_list = devices.create_snmp(template_path)
-            if snmpwalk_list is not None:
-                devices.snmpwalk_dev_templates(snmpwalk_list)
+            snmp_devices = devices.create_snmp(template_path)
+            if snmp_devices is not None:
+                devices.snmpwalk_dev_templates(snmp_devices)
