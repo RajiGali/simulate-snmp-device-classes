@@ -40,10 +40,12 @@ class simulate_snmp_devices:
         # Initialize parser
         parser = argparse.ArgumentParser(description='SNMP Simulator.')
 
+        group = parser.add_mutually_exclusive_group(required=True)
+
         # Adding optional argument
-        parser.add_argument('-d', '--devices', required=False, nargs='+',
+        group.add_argument('-d', '--devices', required=False, nargs='+',
                             help="Enter single or multiple file names using '-d' option Ex:- -d xp.snmprec ubuntu.snmprec", default=False, metavar="")
-        parser.add_argument('-p', '--print', required=False, action='store_true',
+        group.add_argument('-p', '--print', required=False, action='store_true',
                             help=" use '-p' for listing down available device templates to use")
         # Read arguments from command line
         args = parser.parse_args()
