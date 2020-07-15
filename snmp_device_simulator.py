@@ -80,7 +80,7 @@ class DeviceSimulator():
         return port
 
     def create_snmp(self,templates_path,host):
-        """snmpwalk the chosen device templates"""
+        """check response by snmpget for the chosen device templates"""
         num_devices = len(templates_path)
         ports = []
         dev_dirs = []
