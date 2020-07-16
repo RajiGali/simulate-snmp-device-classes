@@ -4,23 +4,20 @@
 import os
 import argparse
 import fnmatch
-import itertools
 import socket
-from itertools import chain
 import subprocess
 from utils import Utils
 from faker import Faker
 
 class DeviceSimulator():
-
-    "Class to simulate snmp devices"
+    "Class to simulate snmp devices."
     def __init__(self):
         "initialize"
         utils = Utils()
         self.config = utils.read_conf('device.conf')
 
     def parse_args():
-        "This function is used to input the templates chosen by the user"
+        "This function is used to input the templates chosen by the user."
         # Initialize parser
         parser = argparse.ArgumentParser(description='SNMP Simulator.')
         group = parser.add_mutually_exclusive_group(required=True)
@@ -35,6 +32,7 @@ class DeviceSimulator():
         return args
 
     def available_templates(data_dir):
+        """ Check for available device templates."""
         try:
             print('************Available device templates to use found in data directory********')
             for (root_dir_path, _, files) in os.walk(data_dir):
@@ -52,7 +50,7 @@ class DeviceSimulator():
             raise("Error in reading available device templates ")
 
     def find_dev_templates(data_dir, dev_templates):
-        "To find the device template path in data directory."
+        """To find the device template path in data directory."""
         templates_path = []
 
         for (root_dir_path , _, files) in os.walk(data_dir):
@@ -70,7 +68,7 @@ class DeviceSimulator():
         return templates_path
 
     def get_open_port(self,host):
-        """To find open port"""
+        """To find open port."""
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((host, 0))
@@ -80,7 +78,7 @@ class DeviceSimulator():
         return port
 
     def create_snmp(self,templates_path,host):
-        """check response by snmpget for the chosen device templates"""
+        """check response by snmpget for the chosen device templates."""
         num_devices = len(templates_path)
         ports = []
         dev_dirs = []
@@ -98,7 +96,7 @@ class DeviceSimulator():
         return ports, dev_dirs
 
     def check_snmp_response(self,ports,dirs):
-        "check if simulated devices are up and running on the aligned ports"
+        "check if simulated devices are up and running on the aligned ports."
         active_devices = []
         active_ports = []
         try:
@@ -117,16 +115,16 @@ class DeviceSimulator():
         return active_ports,active_devices
     
     def update_iptables(self,port_list,active_devices_val):
-        "re-routing the active ports traffic to some fake ips"
+        "re-routing the active ports traffic to some fake ips."
         active_ips = []
         mapped_devices = []
         for port,device in zip(port_list,active_devices_val):
             faker = Faker()
             ip = faker.ipv4()
             try:
-                os.system("echo 'em7admin'|sudo iptables -t nat -A OUTPUT -p udp -d %s --dport 1:65535 -j DNAT --to-destination 127.0.0.1:%s"%(ip,port))
-                os.system("echo 'em7admin'|sudo iptables -t nat -A OUTPUT -p icmp -d %s  --icmp-type echo-request -j DNAT --to-destination 127.0.0.1:%s"%(ip,port))
-                os.system("echo 'em7admin'|sudo iptables -t nat -A OUTPUT -p tcp -d %s  --dport 22 -j DNAT --to-destination 127.0.0.1:%s"%(ip,port))
+                subprocess.run(("sudo iptables -t nat -A OUTPUT -p udp -d %s --dport 1:65535 -j DNAT --to-destination 127.0.0.1:%s"%(ip,port),shell=True))
+                subprocess.run(("sudo iptables -t nat -A OUTPUT -p icmp -d %s  --icmp-type echo-request -j DNAT --to-destination 127.0.0.1:%s"%(ip,port),shell=True))
+                subprocess.run(("sudo iptables -t nat -A OUTPUT -p tcp -d %s  --dport 22 -j DNAT --to-destination 127.0.0.1:%s"%(ip,port),shell=True))
                 active_ips.append(ip)
                 mapped_devices.append(device)
             except OSError:
@@ -149,7 +147,7 @@ if __name__ == '__main__':
             if ports_val is not None:
                 print("\n Checking SNMP simulated devices response....\n ")
                 active_ports_val,active_devices_val = devices.check_snmp_response(ports_val,dev_dir_val)
-                print("\n Updating iptables with fake ips re-routing traffic to active ports\n")
+                print("\n Updating iptables with fake ip's re-routing traffic to active ports\n")
                 simulated_ip_val,mapped_devices_val = devices.update_iptables(active_ports_val,active_devices_val)
-                print("\n Here are the list of mapped ips - %s and simulated devices - %s\n"%(simulated_ip_val,mapped_devices_val))
+                print("\n Here are the list of mapped ip's - %s and simulated devices - %s\n"%(simulated_ip_val,mapped_devices_val))
 
