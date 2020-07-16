@@ -122,9 +122,9 @@ class DeviceSimulator():
             faker = Faker()
             ip = faker.ipv4()
             try:
-                subprocess.run(("sudo iptables -t nat -A OUTPUT -p udp -d %s --dport 1:65535 -j DNAT --to-destination 127.0.0.1:%s"%(ip,port),shell=True))
-                subprocess.run(("sudo iptables -t nat -A OUTPUT -p icmp -d %s  --icmp-type echo-request -j DNAT --to-destination 127.0.0.1:%s"%(ip,port),shell=True))
-                subprocess.run(("sudo iptables -t nat -A OUTPUT -p tcp -d %s  --dport 22 -j DNAT --to-destination 127.0.0.1:%s"%(ip,port),shell=True))
+                subprocess.run("sudo iptables -t nat -A OUTPUT -p udp -d %s --dport 1:65535 -j DNAT --to-destination 127.0.0.1:%s"%(ip,port),shell=True)
+                subprocess.run("sudo iptables -t nat -A OUTPUT -p icmp -d %s  --icmp-type echo-request -j DNAT --to-destination 127.0.0.1:%s"%(ip,port),shell=True)
+                subprocess.run("sudo iptables -t nat -A OUTPUT -p tcp -d %s  --dport 22 -j DNAT --to-destination 127.0.0.1:%s"%(ip,port),shell=True)
                 active_ips.append(ip)
                 mapped_devices.append(device)
             except OSError:
